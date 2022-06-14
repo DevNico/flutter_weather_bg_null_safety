@@ -10,16 +10,18 @@ import 'package:flutter_weather_bg_null_safety/utils/weather_type.dart';
 /// 1. 支持动态切换大小
 /// 2. 支持渐变过度
 class WeatherBg extends StatefulWidget {
+  WeatherBg({
+    Key? key,
+    required this.weatherType,
+    required this.width,
+    required this.height,
+    this.transparent = false,
+  }) : super(key: key);
+
   final WeatherType weatherType;
   final double width;
   final double height;
-
-  WeatherBg(
-      {Key? key,
-      required this.weatherType,
-      required this.width,
-      required this.height})
-      : super(key: key);
+  final bool transparent;
 
   @override
   _WeatherBgState createState() => _WeatherBgState();
@@ -49,12 +51,14 @@ class _WeatherBgState extends State<WeatherBg>
         weatherType: _oldWeatherType!,
         width: widget.width,
         height: widget.height,
+        transparent: widget.transparent,
       );
     }
     var currentBgWidget = WeatherItemBg(
       weatherType: widget.weatherType,
       width: widget.width,
       height: widget.height,
+      transparent: widget.transparent,
     );
     if (oldBgWidget == null) {
       oldBgWidget = currentBgWidget;
@@ -86,44 +90,18 @@ class _WeatherBgState extends State<WeatherBg>
 }
 
 class WeatherItemBg extends StatelessWidget {
+  WeatherItemBg({
+    Key? key,
+    required this.weatherType,
+    required this.width,
+    required this.height,
+    required this.transparent,
+  }) : super(key: key);
+
   final WeatherType weatherType;
-  final width;
-  final height;
-
-  WeatherItemBg({Key? key, required this.weatherType, this.width, this.height})
-      : super(key: key);
-
-  /// 构建晴晚背景效果
-  Widget _buildNightStarBg() {
-    if (weatherType == WeatherType.sunnyNight) {
-      return WeatherNightStarBg(
-        weatherType: weatherType,
-      );
-    }
-    return Container();
-  }
-
-  /// 构建雷暴效果
-  Widget _buildThunderBg() {
-    if (weatherType == WeatherType.thunder) {
-      return WeatherThunderBg(
-        weatherType: weatherType,
-      );
-    }
-    return Container();
-  }
-
-  /// 构建雨雪背景效果
-  Widget _buildRainSnowBg() {
-    if (WeatherUtil.isSnowRain(weatherType)) {
-      return WeatherRainSnowBg(
-        weatherType: weatherType,
-        viewWidth: width,
-        viewHeight: height,
-      );
-    }
-    return Container();
-  }
+  final double width;
+  final double height;
+  final bool transparent;
 
   @override
   Widget build(BuildContext context) {
@@ -133,13 +111,20 @@ class WeatherItemBg extends StatelessWidget {
       child: ClipRect(
         child: Stack(
           children: [
-            WeatherColorBg(weatherType: weatherType,),
-            WeatherCloudBg(
-              weatherType: weatherType,
-            ),
-            _buildRainSnowBg(),
-            _buildThunderBg(),
-            _buildNightStarBg(),
+            if (!transparent) ...[
+              WeatherColorBg(weatherType: weatherType),
+              WeatherCloudBg(weatherType: weatherType),
+            ],
+            if (WeatherUtil.isSnowRain(weatherType))
+              WeatherRainSnowBg(
+                weatherType: weatherType,
+                viewWidth: width,
+                viewHeight: height,
+              ),
+            if (weatherType == WeatherType.thunder)
+              WeatherThunderBg(weatherType: weatherType),
+            if (weatherType == WeatherType.sunnyNight)
+              WeatherNightStarBg(weatherType: weatherType),
           ],
         ),
       ),
