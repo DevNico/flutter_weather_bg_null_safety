@@ -15,13 +15,15 @@ class WeatherBg extends StatefulWidget {
     required this.weatherType,
     required this.width,
     required this.height,
-    this.transparent = false,
+    this.colorOpacity = 1,
+    this.cloudOpacity = 1,
   }) : super(key: key);
 
   final WeatherType weatherType;
   final double width;
   final double height;
-  final bool transparent;
+  final double colorOpacity;
+  final double cloudOpacity;
 
   @override
   _WeatherBgState createState() => _WeatherBgState();
@@ -51,14 +53,16 @@ class _WeatherBgState extends State<WeatherBg>
         weatherType: _oldWeatherType!,
         width: widget.width,
         height: widget.height,
-        transparent: widget.transparent,
+        colorOpacity: widget.colorOpacity,
+        cloudOpacity: widget.cloudOpacity,
       );
     }
     var currentBgWidget = WeatherItemBg(
       weatherType: widget.weatherType,
       width: widget.width,
       height: widget.height,
-      transparent: widget.transparent,
+      cloudOpacity: widget.cloudOpacity,
+      colorOpacity: widget.colorOpacity,
     );
     if (oldBgWidget == null) {
       oldBgWidget = currentBgWidget;
@@ -95,13 +99,15 @@ class WeatherItemBg extends StatelessWidget {
     required this.weatherType,
     required this.width,
     required this.height,
-    required this.transparent,
+    required this.colorOpacity,
+    required this.cloudOpacity,
   }) : super(key: key);
 
   final WeatherType weatherType;
   final double width;
   final double height;
-  final bool transparent;
+  final double cloudOpacity;
+  final double colorOpacity;
 
   @override
   Widget build(BuildContext context) {
@@ -111,10 +117,14 @@ class WeatherItemBg extends StatelessWidget {
       child: ClipRect(
         child: Stack(
           children: [
-            if (!transparent) ...[
-              WeatherColorBg(weatherType: weatherType),
-              WeatherCloudBg(weatherType: weatherType),
-            ],
+            Opacity(
+              opacity: colorOpacity,
+              child: WeatherColorBg(weatherType: weatherType),
+            ),
+            Opacity(
+              opacity: cloudOpacity,
+              child: WeatherCloudBg(weatherType: weatherType),
+            ),
             if (WeatherUtil.isSnowRain(weatherType))
               WeatherRainSnowBg(
                 weatherType: weatherType,
